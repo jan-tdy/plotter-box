@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parametric Plotter Box Generator</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --accent-color: #2563eb;
+            --text-color: #1f2937;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        h1 { margin: 0 0 5px 0; font-size: 1.8rem; }
+        p { margin: 0; color: #6b7280; font-size: 0.95rem; }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1100px;
+            width: 100%;
+            justify-content: center;
+        }
+        .controls-card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            flex: 1;
+            min-width: 280px;
+            max-width: 360px;
+            box-sizing: border-box;
+        }
+        .preview-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            flex: 2;
+            min-width: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+        .control-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+        .slider-val {
+            float: right;
+            font-weight: normal;
+            color: var(--accent-color);
+        }
+        input[type="range"], select, input[type="color"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        input[type="range"] { padding: 0; }
+        input[type="color"] {
+            height: 40px;
+            padding: 2px;
+            cursor: pointer;
+        }
+        .color-pickers {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        button {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 15px;
+        }
+        button:hover { background-color: #1d4ed8; }
+        svg {
+            background-color: #fafafa;
+            border: 1px dashed #d1d5db;
+            border-radius: 6px;
+            max-width: 100%;
+            height: auto;
+            max-height: 70vh;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Plotter Box Template Generator</h1>
+    <p>Parametric, glueless box structures designed perfectly for craft cutting plotters.</p>
+</header>
+
+<div class="container">
+    <div class="controls-card">
+        <div class="control-group">
+            <label for="box-type">Box Style</label>
+            <select id="box-type">
+                <option value="rectangular">Rectangular Self-Locking Box</option>
+                <option value="pillow">Self-Locking Pillow Box</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="width">Width (mm) <span id="w-val" class="slider-val">100</span></label>
+            <input type="range" id="width" min="40" max="300" value="100">
+        </div>
+        <div class="control-group">
+            <label for="height">Height (mm) <span id="h-val" class="slider-val">60</span></label>
+            <input type="range" id="height" min="30" max="200" value="60">
+        </div>
+        <div class="control-group" id="depth-group">
+            <label for="depth">Depth (mm) <span id="d-val" class="slider-val">40</span></label>
+            <input type="range" id="depth" min="20" max="150" value="40">
+        </div>
+
+        <div class="color-pickers">
+            <div class="control-group">
+                <label for="cut-color">Cut Lines</label>
+                <input type="color" id="cut-color" value="#000000">
+            </div>
+            <div class="control-group">
+                <label for="score-color">Pen / Score</label>
+                <input type="color" id="score-color" value="#ff0000">
+            </div>
+        </div>
+
+        <button id="download-btn">Download SVG for Plotter</button>
+    </div>
+
+    <div class="preview-card">
+        <svg id="box-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+</div>
+
+<script>
+    const boxTypeInput = document.getElementById('box-type');
+    const wInput = document.getElementById('width');
+    const hInput = document.getElementById('height');
+    const dInput = document.getElementById('depth');
+    const cutColorInput = document.getElementById('cut-color');
+    const scoreColorInput = document.getElementById('score-color');
+    const svgEl = document.getElementById('box-svg');
+    const depthGroup = document.getElementById('depth-group');
+
+    function updateLabels() {
+        document.getElementById('w-val').innerText = wInput.value;
+        document.getElementById('h-val').innerText = hInput.value;
+        document.getElementById('d-val').innerText = dInput.value;
+        if(boxTypeInput.value === 'pillow') {
+            depthGroup.style.display = 'none';
+        } else {
+            depthGroup.style.display = 'block';
+        }
+    }
+
+    function generateBoxSVG() {
+        const type = boxTypeInput.value;
+        const W = parseFloat(wInput.value);
+        const H = parseFloat(hInput.value);
+        const D = parseFloat(dInput.value);
+        const cutColor = cutColorInput.value;
+        const scoreColor = scoreColorInput.value;
+
+        updateLabels();
+
+        const margin = 20;
+        let totalWidth, totalHeight, cutPath = "", scorePath = "";
+
+        if (type === 'rectangular') {
+            const tabSize = Math.min(15, D * 0.4);
+            const lidFlap = Math.min(20, D * 0.5);
+
+            totalWidth = W + (2 * H) + (4 * D) + (2 * margin);
+            totalHeight = (2 * H) + (3 * D) + (2 * margin);
+
+            const startX = margin + H + D;
+            const startY = margin + D;
+
+            // Boundary path
+            cutPath += `M ${startX},${startY} h ${W/2 - 15} l 3,-${lidFlap} h 24 l 3,${lidFlap} h ${W/2 - 15} v ${D} `;
+            cutPath += `h ${D} v -${D - tabSize} h ${H} v ${D - tabSize} v ${H} `;
+            cutPath += `h -${H} v ${D - tabSize} h -${D} v -${D - tabSize} v ${D} v ${H} h -${W} v -${H} v -${D} `;
+            cutPath += `h -${D} v ${D - tabSize} h -${H} v -${D - tabSize} v -${H} h ${H} v -${D - tabSize} h ${D} v ${D - tabSize} Z`;
+
+            // Locking holes
+            const slotY1 = startY + D + H;
+            cutPath += ` M ${startX + W/2 - 13},${slotY1} h 26 v 0.8 h -26 Z`;
+            const slotYLeft = startY + D + (H/2) - 10;
+            cutPath += ` M ${startX + 3},${slotYLeft} v 20 h 0.8 v -20 Z`;
+            cutPath += ` M ${startX + W - 3.8},${slotYLeft} v 20 h 0.8 v -20 Z`;
+
+            // Score Lines
+            scorePath += `M ${startX},${startY + D} h ${W} M ${startX},${startY + D + H} h ${W} M ${startX},${startY + D + H + D} h ${W} `;
+            scorePath += `M ${startX},${startY + D} v ${H} M ${startX + W},${startY + D} v ${H} M ${startX - D},${startY + D} v ${H} M ${startX + W + D},${startY + D} v ${H} `;
+            scorePath += `M ${startX},${startY} h ${W} M ${startX},${startY + D + H + D + H} h ${W} `;
+
+        } else if (type === 'pillow') {
+            // Pillow box setup
+            totalWidth = W + (2 * margin);
+            totalHeight = (H * 2) + (2 * margin);
+
+            const startX = margin;
+            const startY = margin;
+            const midY = startY + H;
+            const R = W * 0.15; // Arc Radius
+
+            // Main contour layout
+            cutPath += `M ${startX},${startY} h ${W} v ${H * 2} h -${W} Z`;
+            
+            // Side interlock tab slots on side borders
+            cutPath += ` M ${startX},${startY + H/2 - 10} h -8 v 20 h 8 Z`;
+            cutPath += ` M ${startX + W},${startY + H/2 - 10} h 8 v 20 h -8 Z`;
+
+            // Score horizontal dividing fold
+            scorePath += `M ${startX},${midY} h ${W} `;
+
+            // Curved elliptical folding flaps for Pillow profiles
+            scorePath += `M ${startX},${startY} A ${W/2} ${R} 0 0 0 ${startX + W},${startY} `;
+            scorePath += `M ${startX},${midY} A ${W/2} ${R} 0 0 0 ${startX + W},${midY} `;
+            scorePath += `M ${startX},${midY} A ${W/2} ${R} 0 0 1 ${startX + W},${midY} `;
+            scorePath += `M ${startX},${startY + H*2} A ${W/2} ${R} 0 0 1 ${startX + W},${startY + H*2} `;
+        }
+
+        svgEl.setAttribute('width', '100%');
+        svgEl.setAttribute('viewBox', `0 0 ${totalWidth} ${totalHeight}`);
+        svgEl.innerHTML = `
+            <g id="score-layer" stroke="${scoreColor}" stroke-width="1.5" stroke-dasharray="4,4" fill="none">
+                <path d="${scorePath}" />
+            </g>
+            <g id="cut-layer" stroke="${cutColor}" stroke-width="1.5" fill="none" stroke-linejoin="round">
+                <path d="${cutPath}" />
+            </g>
+        `;
+    }
+
+    function downloadSVG() {
+        const svgData = svgEl.outerHTML;
+        const svgBlob = new Blob([svgData], {type: "image/svg+xml;charset=utf-8"});
+        const svgUrl = URL.createObjectURL(svgBlob);
+        const downloadLink = document.createElement("a");
+        downloadLink.href = svgUrl;
+        downloadLink.download = `${boxTypeInput.value}_box.svg`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
+
+    [boxTypeInput, wInput, hInput, dInput, cutColorInput, scoreColorInput].forEach(el => {
+        el.addEventListener('input', generateBoxSVG);
+    });
+    document.getElementById('download-btn').addEventListener('click', downloadSVG);
+
+    generateBoxSVG();
+</script>
+
+</body>
+</html>
