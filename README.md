@@ -3,7 +3,7 @@
 A lightweight, purely client-side web application designed to generate **parametric, self-locking vector box templates** for craft cutters and vinyl plotters (Cricut, Silhouette, Brother ScanNCut, etc.).
 
 ## 🚀 Live Demo
-You can host this project completely free on GitHub Pages at `https://<your-username>.github.io/boxgenerator`.
+You can host this project completely free on GitHub Pages at `https://boxgenerator.github.io`.
 
 ## ✨ Features
 - **Zero Glue Required:** Generates modern self-locking boxes with mechanical tabs and slots.
@@ -17,7 +17,7 @@ You can host this project completely free on GitHub Pages at `https://<your-user
 2. Select your box style and modify the geometry inputs.
 3. Set your plotter stroke color profiles.
 4. Click **Download SVG for Plotter** to save the vector layout.
-5. Import directly into **Cricut Design Space** or **Silhouette Studio**. Change the score line layer type to "Score" or "Pen" inside your cutting software before launching the run.
+5. Import directly into your plotter software (I recommend [linux-print](www.github.com/jan-tdy/linux-print), but you can use what you want).
 
 ## 📝 License
 MIT License. Feel free to use, modify, and build upon this utility!
