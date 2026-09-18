@@ -2,9 +2,6 @@
 
 A lightweight, purely client-side web application designed to generate **parametric, self-locking vector box templates** for craft cutters and vinyl plotters (Cricut, Silhouette, Brother ScanNCut, etc.).
 
-## 🚀 Live Demo
-You can host this project completely free on GitHub Pages at `https://boxgenerator.github.io`.
-
 ## ✨ Features
 - **Zero Glue Required:** Generates modern self-locking boxes with mechanical tabs and slots.
 - **Parametric Controls:** Dynamically adjust **Width, Height, and Depth** via live UI sliders.
